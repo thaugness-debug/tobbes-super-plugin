@@ -1,0 +1,27 @@
+name: Build Windows VST3
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: microsoft/setup-msbuild@v2
+      - name: Build VST3
+        shell: cmd
+        run: >
+          msbuild plugin\builds\vs17\Vial.sln
+          /t:"Vial - VST3"
+          /p:Configuration=Release /p:Platform=x64
+          /p:PlatformToolset=v143
+          /m /v:minimal
+      - name: Package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force out | Out-Null
+          Copy-Item "plugin\builds\vs17\x64\Release\VST3\Vial.vst3" "out\Tobbes Super Plugin.vst3"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Tobbes-Super-Plugin-VST3
+          path: out
