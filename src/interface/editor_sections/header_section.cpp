@@ -134,16 +134,56 @@ LogoSection::LogoSection() : SynthSection("logo_section") {
 void LogoSection::resized() {
   int logo_padding_y = kLogoPaddingY * size_ratio_;
   int logo_height = getHeight() - 2 * logo_padding_y;
-  int logo_padding_x = (getWidth() - logo_height) / 2;
+  int logo_box_width = std::min<int>(getWidth(), findValue(Skin::kModulationButtonWidth));
+  int logo_padding_x = (logo_box_width - logo_height) / 2;
   if (logo_button_)
     logo_button_->setBounds(logo_padding_x, logo_padding_y, logo_height, logo_height);
+}
+
+static void paintLightningText(Graphics& g, const String& text, Rectangle<float> area, Colour glow) {
+  if (area.getWidth() < 4.0f || area.getHeight() < 4.0f)
+    return;
+
+  GlyphArrangement glyphs;
+  glyphs.addLineOfText(Fonts::instance()->proportional_title_regular().withPointHeight(100.0f), text, 0.0f, 0.0f);
+  Path letters;
+  glyphs.createPath(letters);
+  if (letters.isEmpty())
+    return;
+
+  // Skraastilt og fet, med lilla gloed rundt.
+  Rectangle<float> inner = area.withTrimmedRight(area.getHeight() * 0.3f);
+  letters.applyTransform(letters.getTransformToScaleToFit(inner, true, Justification::centredLeft));
+  float base = area.getBottom();
+  letters.applyTransform(AffineTransform::translation(0.0f, -base)
+                             .followedBy(AffineTransform::shear(-0.28f, 0.0f))
+                             .followedBy(AffineTransform::translation(0.0f, base)));
+
+  Path heavy;
+  PathStrokeType(std::max(0.6f, area.getHeight() * 0.07f)).createStrokedPath(heavy, letters);
+
+  DropShadow(glow, std::max<int>(2, area.getHeight() * 0.45f), Point<int>(0, 0)).drawForPath(g, heavy);
+  DropShadow(glow.brighter(0.6f), std::max<int>(1, area.getHeight() * 0.15f), Point<int>(0, 0)).drawForPath(g, heavy);
+
+  g.setGradientFill(ColourGradient(Colours::white, 0.0f, area.getY(),
+                                   glow.brighter(0.9f), 0.0f, area.getBottom(), false));
+  g.fillPath(letters);
+  g.fillPath(heavy);
 }
 
 void LogoSection::paintBackground(Graphics& g) {
   if (logo_button_) {
     logo_button_->setRingColors(findColour(Skin::kWidgetPrimary1, true), findColour(Skin::kWidgetPrimary2, true));
-    logo_button_->setLetterColors(findColour(Skin::kWidgetSecondary1, true), findColour(Skin::kWidgetSecondary2, true));
+    logo_button_->setLetterColors(Colours::white, findColour(Skin::kWidgetPrimary1, true).brighter(0.8f));
   }
+
+  int title_x = findValue(Skin::kModulationButtonWidth);
+  if (logo_button_)
+    title_x = logo_button_->getRight() + getHeight() * 0.12f;
+  float title_width = getWidth() - title_x;
+  Colour glow = findColour(Skin::kWidgetPrimary1, true);
+  paintLightningText(g, "TOBBE'S", Rectangle<float>(title_x, getHeight() * 0.10f, title_width, getHeight() * 0.42f), glow);
+  paintLightningText(g, "SUPER PLUGIN", Rectangle<float>(title_x, getHeight() * 0.56f, title_width, getHeight() * 0.30f), glow);
 }
 
 void LogoSection::buttonClicked(Button* clicked_button) {
@@ -160,9 +200,9 @@ HeaderSection::HeaderSection() : SynthSection("header_section"), tab_offset_(0) 
   addAndMakeVisible(tab_selector_.get());
   addOpenGlComponent(tab_selector_->getImageComponent());
   tab_selector_->setSliderStyle(Slider::LinearBar);
-  tab_selector_->setRange(0, 3);
+  tab_selector_->setRange(0, 4);
   tab_selector_->addListener(this);
-  tab_selector_->setNames({"VOICE", "EFFECTS", "MATRIX", "ADVANCED"});
+  tab_selector_->setNames({"VOICE", "EFFECTS", "MATRIX", "ADVANCED", "HJ\306LP!"});
   tab_selector_->setScrollWheelEnabled(false);
 
   synth_preset_selector_ = std::make_unique<SynthPresetSelector>();
@@ -239,12 +279,13 @@ void HeaderSection::resized() {
   int widget_margin = findValue(Skin::kWidgetMargin);
   int large_padding = findValue(Skin::kLargePadding);
   int logo_width = findValue(Skin::kModulationButtonWidth);
-  logo_section_->setBounds(large_padding, 0, logo_width, height);
+  int title_width = 2.7f * height;
+  logo_section_->setBounds(large_padding, 0, logo_width + title_width, height);
 
-  int preset_selector_width = width / 3;
+  int preset_selector_width = width * 0.27f;
   int preset_selector_height = height * 0.6f;
   int preset_selector_buffer = (height - preset_selector_height) * 0.5f;
-  int preset_selector_x = (getWidth() - preset_selector_width + 2 * preset_selector_height) / 2;
+  int preset_selector_x = (getWidth() - preset_selector_width + 2 * preset_selector_height) / 2 + title_width / 2;
   synth_preset_selector_->setBounds(preset_selector_x, preset_selector_buffer,
                                     preset_selector_width, preset_selector_height);
 
@@ -257,9 +298,10 @@ void HeaderSection::resized() {
   view_spectrogram_->setBounds(oscilloscope_->getBounds());
   spectrogram_->setBounds(oscilloscope_->getBounds());
 
-  int tabs_width = preset_selector_x - component_padding - tab_offset_;
-  tab_selector_->setBounds(tab_offset_, 0, tabs_width, height);
-  exit_temporary_button_->setBounds(tab_offset_, 0, height, height);
+  int tabs_x = std::max<int>(tab_offset_, logo_section_->getRight() + component_padding);
+  int tabs_width = preset_selector_x - component_padding - tabs_x;
+  tab_selector_->setBounds(tabs_x, 0, tabs_width, height);
+  exit_temporary_button_->setBounds(tabs_x, 0, height, height);
 
   float temporary_height = getHeight() * kTextHeightRatio;
   temporary_tab_->setTextSize(temporary_height);

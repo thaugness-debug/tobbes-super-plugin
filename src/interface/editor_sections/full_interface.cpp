@@ -15,6 +15,7 @@
  */
 
 #include "full_interface.h"
+#include "help_section.h"
 
 #include "about_section.h"
 #include "bank_exporter.h"
@@ -113,6 +114,12 @@ FullInterface::FullInterface(SynthGuiData* synth_data) : SynthSection("full_inte
   addSubSection(modulation_matrix_.get());
   modulation_matrix_->setVisible(false);
   modulation_matrix_->addListener(this);
+
+  help_section_ = std::make_unique<HelpSection>();
+  addSubSection(help_section_.get());
+  help_section_->setVisible(false);
+  photo_ = ImageFileFormat::loadFrom(BinaryData::tobbe_bg_jpg, BinaryData::tobbe_bg_jpgSize);
+
   createModulationSliders(synth_data->mono_modulations, synth_data->poly_modulations);
 
   preset_browser_ = std::make_unique<PresetBrowser>();
@@ -259,8 +266,28 @@ FullInterface::~FullInterface() {
   open_gl_context_.setRenderer(nullptr);
 }
 
+void FullInterface::updatePhoto() {
+  if (!photo_.isValid() || getWidth() <= 0 || getHeight() <= 0)
+    return;
+  if (photo_scaled_.isValid() && photo_scaled_.getWidth() == getWidth() && photo_scaled_.getHeight() == getHeight())
+    return;
+
+  photo_scaled_ = Image(Image::RGB, getWidth(), getHeight(), true);
+  Graphics photo_g(photo_scaled_);
+  photo_g.drawImage(photo_, getLocalBounds().toFloat(), RectanglePlacement(RectanglePlacement::fillDestination));
+}
+
+void FullInterface::paintPhoto(Graphics& g, float opacity) {
+  if (!photo_scaled_.isValid())
+    return;
+  g.setOpacity(opacity);
+  g.drawImageAt(photo_scaled_, 0, 0);
+  g.setOpacity(1.0f);
+}
+
 void FullInterface::paintBackground(Graphics& g) {
   g.fillAll(findColour(Skin::kBackground, true));
+  paintPhoto(g, kPhotoGapOpacity);
   paintChildrenShadows(g);
 
   if (effects_interface_ == nullptr)
@@ -344,6 +371,10 @@ void FullInterface::repaintSynthesisSection() {
   int padding = findValue(Skin::kPadding);
   g.setColour(findColour(Skin::kBackground, true));
   g.fillRect(synthesis_interface_->getBounds().expanded(padding));
+  g.saveState();
+  g.reduceClipRegion(synthesis_interface_->getBounds().expanded(padding));
+  paintPhoto(g, kPhotoGapOpacity);
+  g.restoreState();
   paintChildShadow(g, synthesis_interface_.get());
   paintChildBackground(g, synthesis_interface_.get());
 
@@ -371,6 +402,7 @@ void FullInterface::redoBackground() {
   ScopedLock open_gl_lock(open_gl_critical_section_);
 
   background_.lock();
+  updatePhoto();
   background_image_ = Image(Image::RGB, width, height, true);
   Graphics g(background_image_);
   paintBackground(g);
@@ -456,6 +488,8 @@ void FullInterface::resized() {
     synthesis_interface_->setBounds(main_bounds);
   effects_interface_->setBounds(main_bounds.withRight(main_bounds.getRight() + voice_padding));
   modulation_matrix_->setBounds(main_bounds);
+  if (help_section_)
+    help_section_->setBounds(main_bounds);
   int modulation_height = voice_height - knob_section_height - padding;
   modulation_interface_->setBounds(main_bounds.getRight() + voice_padding,
                                    main_bounds.getY(), modulation_width, modulation_height);
@@ -657,6 +691,8 @@ void FullInterface::tabSelected(int index) {
   effects_interface_->setVisible(index == 1 && make_visible);
   modulation_matrix_->setVisible(index == 2 && make_visible);
   master_controls_interface_->setVisible(index == 3 && make_visible);
+  if (help_section_)
+    help_section_->setVisible(index == 4 && make_visible);
   modulation_manager_->setModulationAmounts();
   modulation_manager_->resized();
   modulation_manager_->setVisibleMeterBounds();

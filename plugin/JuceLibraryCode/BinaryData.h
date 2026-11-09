@@ -17,6 +17,9 @@ namespace BinaryData
     extern const char*   Pythagorean_scl;
     const int            Pythagorean_sclSize = 108;
 
+    extern const char*   tobbe_bg_jpg;
+    const int            tobbe_bg_jpgSize = 160430;
+
     extern const char*   default_vitalskin;
     const int            default_vitalskinSize = 10492;
 

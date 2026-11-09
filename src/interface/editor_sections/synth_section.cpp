@@ -181,6 +181,20 @@ void SynthSection::paintContainer(Graphics& g) {
 void SynthSection::paintBody(Graphics& g, Rectangle<int> bounds) {
   g.setColour(findColour(Skin::kBody, true));
   g.fillRoundedRectangle(bounds.toFloat(), findValue(Skin::kBodyRounding));
+
+  // Tobbe: la bakgrunnsbildet skinne svakt gjennom alle paneler.
+  FullInterface* full_interface = findParentComponentOfClass<FullInterface>();
+  if (full_interface == nullptr || !full_interface->getScaledPhoto().isValid())
+    return;
+
+  Point<int> offset = full_interface->getLocalPoint(this, Point<int>(0, 0));
+  Path body_shape;
+  body_shape.addRoundedRectangle(bounds.toFloat(), findValue(Skin::kBodyRounding));
+  g.saveState();
+  g.reduceClipRegion(body_shape);
+  g.setOpacity(FullInterface::kPhotoBodyOpacity);
+  g.drawImageAt(full_interface->getScaledPhoto(), -offset.x, -offset.y);
+  g.restoreState();
 }
 
 void SynthSection::paintBorder(Graphics& g, Rectangle<int> bounds) {

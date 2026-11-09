@@ -40,6 +40,7 @@ class ExtraModSection;
 class HeaderSection;
 class KeyboardInterface;
 class MasterControlsInterface;
+class HelpSection;
 class ModulationInterface;
 class ModulationManager;
 class PortamentoSection;
@@ -76,7 +77,13 @@ class FullInterface : public SynthSection, public AuthenticationSection::Listene
     void repaintChildBackground(SynthSection* child);
     void repaintSynthesisSection();
     void repaintOpenGlBackground(OpenGlComponent* component);
+    static constexpr float kPhotoGapOpacity = 0.75f;
+    static constexpr float kPhotoBodyOpacity = 0.38f;
+
     void redoBackground();
+    void updatePhoto();
+    void paintPhoto(Graphics& g, float opacity);
+    const Image& getScaledPhoto() const { return photo_scaled_; }
     void checkShouldReposition(bool resize = true);
     void parentHierarchyChanged() override {
       SynthSection::parentHierarchyChanged();
@@ -173,6 +180,7 @@ class FullInterface : public SynthSection, public AuthenticationSection::Listene
     std::map<std::string, Button*> button_lookup_;
     std::unique_ptr<ModulationManager> modulation_manager_;
     std::unique_ptr<ModulationMatrix> modulation_matrix_;
+    std::unique_ptr<HelpSection> help_section_;
 
     std::unique_ptr<AboutSection> about_section_;
     std::unique_ptr<AuthenticationSection> authentication_;
@@ -218,6 +226,8 @@ class FullInterface : public SynthSection, public AuthenticationSection::Listene
     std::unique_ptr<Shaders> shaders_;
     OpenGlWrapper open_gl_;
     Image background_image_;
+    Image photo_;
+    Image photo_scaled_;
     OpenGlBackground background_;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FullInterface)

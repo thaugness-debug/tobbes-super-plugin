@@ -31,14 +31,26 @@ class Paths {
     }
 
     static Path vitalRing() {
-      Path path = fromSvgData((const void*)BinaryData::vital_ring_svg, BinaryData::vital_ring_svgSize);
+      float unit = kLogoWidth / 100.0f;
+      Path circle;
+      circle.addEllipse(4.0f * unit, 4.0f * unit, 92.0f * unit, 92.0f * unit);
+      Path path;
+      PathStrokeType(5.0f * unit).createStrokedPath(path, circle);
       path.addLineSegment(Line<float>(0.0f, 0.0f, 0.0f, 0.0f), 0.2f);
       path.addLineSegment(Line<float>(kLogoWidth, kLogoWidth, kLogoWidth, kLogoWidth), 0.2f);
       return path;
     }
 
     static Path vitalV() {
-      Path path = fromSvgData((const void*)BinaryData::vital_v_svg, BinaryData::vital_ring_svgSize);
+      float unit = kLogoWidth / 100.0f;
+      Path path;
+      path.startNewSubPath(60.0f * unit, 14.0f * unit);
+      path.lineTo(30.0f * unit, 55.0f * unit);
+      path.lineTo(47.0f * unit, 55.0f * unit);
+      path.lineTo(39.0f * unit, 86.0f * unit);
+      path.lineTo(71.0f * unit, 43.0f * unit);
+      path.lineTo(53.0f * unit, 43.0f * unit);
+      path.closeSubPath();
       path.addLineSegment(Line<float>(0.0f, 0.0f, 0.0f, 0.0f), 0.2f);
       path.addLineSegment(Line<float>(kLogoWidth, kLogoWidth, kLogoWidth, kLogoWidth), 0.2f);
       return path;
