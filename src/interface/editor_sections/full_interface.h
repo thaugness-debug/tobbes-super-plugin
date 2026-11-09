@@ -79,10 +79,12 @@ class FullInterface : public SynthSection, public AuthenticationSection::Listene
     void repaintOpenGlBackground(OpenGlComponent* component);
     static constexpr float kPhotoGapOpacity = 0.75f;
     static constexpr float kPhotoBodyOpacity = 0.38f;
+    static constexpr float kPhotoWidgetOpacity = 0.2f;
 
     void redoBackground();
     void updatePhoto();
     void paintPhoto(Graphics& g, float opacity);
+    static void paintPhotoBehind(Component* component, Graphics& g, Rectangle<int> bounds, float opacity);
     const Image& getScaledPhoto() const { return photo_scaled_; }
     void checkShouldReposition(bool resize = true);
     void parentHierarchyChanged() override {

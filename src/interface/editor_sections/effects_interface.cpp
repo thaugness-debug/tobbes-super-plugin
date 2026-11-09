@@ -32,6 +32,7 @@ class EffectsContainer : public SynthSection {
     EffectsContainer(String name) : SynthSection(name) { }
     void paintBackground(Graphics& g) override {
       g.fillAll(findColour(Skin::kBackground, true));
+      FullInterface::paintPhotoBehind(this, g, getLocalBounds(), FullInterface::kPhotoGapOpacity);
       paintChildrenShadows(g);
       paintChildrenBackgrounds(g);
     }
@@ -114,6 +115,8 @@ void EffectsInterface::paintBackground(Graphics& g) {
   Colour background = findColour(Skin::kBackground, true);
   g.setColour(background);
   g.fillRect(getLocalBounds().withRight(getWidth() - findValue(Skin::kLargePadding) / 2));
+  FullInterface::paintPhotoBehind(this, g, getLocalBounds().withRight(getWidth() - findValue(Skin::kLargePadding) / 2),
+                                  FullInterface::kPhotoGapOpacity);
   paintChildBackground(g, effect_order_.get());
 
   redoBackgroundImage();

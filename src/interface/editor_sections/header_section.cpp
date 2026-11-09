@@ -202,7 +202,7 @@ HeaderSection::HeaderSection() : SynthSection("header_section"), tab_offset_(0) 
   tab_selector_->setSliderStyle(Slider::LinearBar);
   tab_selector_->setRange(0, 4);
   tab_selector_->addListener(this);
-  tab_selector_->setNames({"VOICE", "EFFECTS", "MATRIX", "ADVANCED", "HJ\306LP!"});
+  tab_selector_->setNames({"VOICE", "EFFECTS", "MATRIX", "ADVANCED", "HJ\303\206LP!"});
   tab_selector_->setScrollWheelEnabled(false);
 
   synth_preset_selector_ = std::make_unique<SynthPresetSelector>();

@@ -285,6 +285,22 @@ void FullInterface::paintPhoto(Graphics& g, float opacity) {
   g.setOpacity(1.0f);
 }
 
+// Tegner bakgrunnsbildet inni et vilkaarlig panel, paa riktig sted i forhold til hele vinduet.
+void FullInterface::paintPhotoBehind(Component* component, Graphics& g, Rectangle<int> bounds, float opacity) {
+  if (component == nullptr)
+    return;
+  FullInterface* full_interface = component->findParentComponentOfClass<FullInterface>();
+  if (full_interface == nullptr || !full_interface->photo_scaled_.isValid())
+    return;
+
+  Point<int> offset = full_interface->getLocalPoint(component, Point<int>(0, 0));
+  g.saveState();
+  g.reduceClipRegion(bounds);
+  g.setOpacity(opacity);
+  g.drawImageAt(full_interface->photo_scaled_, -offset.x, -offset.y);
+  g.restoreState();
+}
+
 void FullInterface::paintBackground(Graphics& g) {
   g.fillAll(findColour(Skin::kBackground, true));
   paintPhoto(g, kPhotoGapOpacity);

@@ -15,6 +15,7 @@
  */
 
 #include "modulation_matrix.h"
+#include "full_interface.h"
 
 #include "bar_renderer.h"
 #include "fonts.h"
@@ -418,6 +419,7 @@ void ModulationMatrixRow::resized() {
 void ModulationMatrixRow::paintBackground(Graphics& g) {
   g.setColour(findColour(Skin::kBody, true));
   g.fillRect(getLocalBounds());
+  FullInterface::paintPhotoBehind(this, g, getLocalBounds(), FullInterface::kPhotoBodyOpacity);
 
   g.setColour(findColour(Skin::kTextComponentBackground, true));
   int rounding = findValue(Skin::kWidgetRoundedCorner);
@@ -762,6 +764,8 @@ void ModulationMatrix::paintBackground(Graphics& g) {
   g.saveState();
   g.reduceClipRegion(0, title_width, getWidth(), getHeight());
   g.fillRoundedRectangle(0, 0, getWidth(), viewport_.getBottom(), rounding);
+  FullInterface::paintPhotoBehind(this, g, Rectangle<int>(0, 0, getWidth(), viewport_.getBottom()),
+                                  FullInterface::kPhotoGapOpacity);
   g.restoreState();
 
   paintBorder(g, matrix_bounds);

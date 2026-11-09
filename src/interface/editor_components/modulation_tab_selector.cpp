@@ -15,6 +15,7 @@
  */
 
 #include "modulation_tab_selector.h"
+#include "full_interface.h"
 #include "modulation_button.h"
 #include "synth_section.h"
 #include "skin.h"
@@ -48,6 +49,7 @@ void ModulationTabSelector::paintBackground(Graphics& g) {
   }
 
   g.fillAll(findColour(Skin::kBackground, true));
+  FullInterface::paintPhotoBehind(this, g, getLocalBounds(), FullInterface::kPhotoGapOpacity);
   paintTabShadow(g);
 
   for (auto& button : modulation_buttons_) {

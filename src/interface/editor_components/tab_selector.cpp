@@ -57,7 +57,7 @@ void TabSelector::paint(Graphics& g) {
     else
       g.setColour(findColour(Skin::kTextComponentText, true));
 
-    g.drawText(name, from_x, 0, to_x - from_x, getHeight(), Justification::centred);
+    g.drawText(String::fromUTF8(name.c_str()), from_x, 0, to_x - from_x, getHeight(), Justification::centred);
   }
 }
 

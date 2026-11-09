@@ -15,6 +15,7 @@
  */
 
 #include "modulation_interface.h"
+#include "full_interface.h"
 
 #include "envelope_section.h"
 #include "extra_mod_section.h"
@@ -114,6 +115,7 @@ ModulationInterface::~ModulationInterface() { }
 
 void ModulationInterface::paintBackground(Graphics& g) {
   g.fillAll(findColour(Skin::kBackground, true));
+  FullInterface::paintPhotoBehind(this, g, getLocalBounds(), FullInterface::kPhotoGapOpacity);
   paintBackgroundShadow(g);
 
   int mod_x = lfo_tab_selector_->getX();

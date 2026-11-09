@@ -121,6 +121,7 @@ void OpenGlComponent::paintBackground(Graphics& g) {
     return;
 
   g.fillAll(findColour(Skin::kWidgetBackground, true));
+  FullInterface::paintPhotoBehind(this, g, getLocalBounds(), FullInterface::kPhotoWidgetOpacity);
 }
 
 void OpenGlComponent::repaintBackground() {
